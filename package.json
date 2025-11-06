@@ -1,0 +1,13 @@
+{
+  "name": "jobjack-project",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:api": "yarn workspace api dev",
+    "build:api": "yarn workspace api build",
+    "start:api": "yarn workspace api start"
+  }
+}
