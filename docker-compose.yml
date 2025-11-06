@@ -14,6 +14,8 @@ services:
       timeout: 3s
       retries: 10
     restart: unless-stopped
+    volumes:
+      - "C:/:/host/c:ro"
 
   web:
     build:
