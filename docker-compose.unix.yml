@@ -1,0 +1,4 @@
+services:
+  api:
+    volumes:
+      - "/:/host:ro"   # mounts the entire root filesystem read-only

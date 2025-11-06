@@ -1,6 +1,7 @@
 <main style="max-width:900px;margin:2rem auto;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif">
   <h1>JobJack Directory Browser</h1>
 
+  <!-- Path bar -->
   <form (submit)="onList($event)" style="display:flex;gap:.5rem;margin:.75rem 0">
     <input
       type="text"
@@ -9,9 +10,11 @@
       [value]="path()"
       (input)="path.set(($any($event.target)?.value ?? ''))"
     />
-
     <button type="submit">List</button>
+    <button type="button" (click)="goUp()">Up</button>
   </form>
+
+  <div style="margin:.5rem 0;color:#666">Current: <code>{{ path() || '(none)' }}</code></div>
 
   <p *ngIf="loading()">Loading… (streaming)</p>
   <p *ngIf="!loading() && entries().length===0">No entries.</p>
@@ -28,7 +31,21 @@
     </thead>
     <tbody>
       <tr *ngFor="let e of entries(); trackBy: track">
-        <td>{{ e.name }}</td>
+        <td>
+          <!-- Clickable only for directories -->
+          <button
+            *ngIf="e.kind === 'dir'; else fileName"
+            type="button"
+            (click)="navigateToDir(e.hostPath)"
+            style="all:unset;color:#1a73e8;cursor:pointer"
+            title="Open folder"
+          >
+            📁 {{ e.name }}
+          </button>
+          <ng-template #fileName>
+            {{ e.name }}
+          </ng-template>
+        </td>
         <td>{{ e.kind }}</td>
         <td>{{ e.size ?? '-' }}</td>
         <td>{{ e.createdAt }}</td>

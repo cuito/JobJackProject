@@ -1,0 +1,6 @@
+services:
+  api:
+    volumes:
+      - "C:/:/host/c:ro"
+      # Uncomment only if the D: drive exists on the machine you are using to run the containers
+      # - "D:/:/host/d:ro"

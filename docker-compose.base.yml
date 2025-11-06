@@ -5,7 +5,7 @@ services:
       dockerfile: packages/api/Dockerfile
     container_name: jobjack-api
     environment:
-      NODE_ENV: "production"
+      NODE_ENV: production
     ports:
       - "3000:3000"
     healthcheck:
@@ -14,8 +14,6 @@ services:
       timeout: 3s
       retries: 10
     restart: unless-stopped
-    volumes:
-      - "C:/:/host/c:ro"
 
   web:
     build:

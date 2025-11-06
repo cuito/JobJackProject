@@ -18,21 +18,42 @@ type Entry = {
 })
 export class AppComponent {
   path = signal('');
-  only = signal<'all'|'files'|'dirs'>('all');
   loading = signal(false);
   entries = signal<Entry[]>([]);
 
   track = (_: number, e: Entry) => e.hostPath + '::' + e.name;
 
-  async onList(ev: Event) {
-    ev.preventDefault();
+  /** Compute parent of a host path (supports Windows and Unix). */
+  private parentPathOf(p: string): string {
+    if (!p) return '';
+    // Windows? e.g. C:\ or D:\foo\bar
+    const isWin = /^[a-zA-Z]:\\/.test(p) || /^[a-zA-Z]:$/.test(p);
+    if (isWin) {
+      const norm = p.replace(/\\+$/,'');                   // remove trailing slashes
+      if (/^[a-zA-Z]:\\?$/.test(norm)) return norm + '\\'; // already at drive root like "C:\" (stay)
+      const parts = norm.split('\\');
+      parts.pop();                                         // remove last segment
+      const parent = parts.join('\\');
+      return /^[a-zA-Z]:$/.test(parent) ? parent + '\\' : parent;
+    }
+    // Unix
+    const norm = p.replace(/\/+$/,'');                     // remove trailing slashes
+    if (norm === '' || norm === '/') return '/';           // at root (stay)
+    const parts = norm.split('/');
+    parts.pop();
+    const parent = parts.join('/') || '/';
+    return parent;
+  }
+
+  async onList(ev?: Event) {
+    ev?.preventDefault();
     this.loading.set(true);
     this.entries.set([]);
 
     const qp = new URLSearchParams({
       path: this.path(),
       only: 'all',
-      limit: '0'   // stream all; set a number to cap
+      limit: '0'
     });
 
     const res = await fetch(`/api/dir?${qp.toString()}`, {
@@ -57,7 +78,7 @@ export class AppComponent {
         try {
           const e: Entry = JSON.parse(line);
           this.entries.update(arr => [...arr, e]);
-        } catch { /* ignore bad lines */ }
+        } catch { /* ignore bad line */ }
       }
     }
 
@@ -66,5 +87,17 @@ export class AppComponent {
     }
 
     this.loading.set(false);
+  }
+
+  /** Navigate into a directory (from a clicked row). */
+  async navigateToDir(dirHostPath: string) {
+    this.path.set(dirHostPath);
+    await this.onList();
+  }
+
+  /** Go to parent directory. */
+  async goUp() {
+    this.path.set(this.parentPathOf(this.path()));
+    await this.onList();
   }
 }
