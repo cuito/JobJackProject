@@ -1,6 +1,39 @@
-<main style="max-width:720px;margin:2rem auto;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif">
+<main style="max-width:900px;margin:2rem auto;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif">
   <h1>JobJack Directory Browser</h1>
-  <p>API says: <strong>{{ message || 'Loading…' }}</strong></p>
-</main>
 
-<router-outlet />
+  <form (submit)="onList($event)" style="display:flex;gap:.5rem;margin:.75rem 0">
+    <input
+      type="text"
+      style="flex:1;padding:.5rem"
+      placeholder="Absolute path e.g. C:\Users\Me\Documents or /var/log"
+      [value]="path()"
+      (input)="path.set(($any($event.target)?.value ?? ''))"
+    />
+
+    <button type="submit">List</button>
+  </form>
+
+  <p *ngIf="loading()">Loading… (streaming)</p>
+  <p *ngIf="!loading() && entries().length===0">No entries.</p>
+
+  <table *ngIf="entries().length" style="width:100%;border-collapse:collapse">
+    <thead>
+      <tr>
+        <th style="text-align:left;border-bottom:1px solid #ddd">Name</th>
+        <th style="text-align:left;border-bottom:1px solid #ddd">Kind</th>
+        <th style="text-align:left;border-bottom:1px solid #ddd">Size</th>
+        <th style="text-align:left;border-bottom:1px solid #ddd">Created</th>
+        <th style="text-align:left;border-bottom:1px solid #ddd">Path</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of entries(); trackBy: track">
+        <td>{{ e.name }}</td>
+        <td>{{ e.kind }}</td>
+        <td>{{ e.size ?? '-' }}</td>
+        <td>{{ e.createdAt }}</td>
+        <td>{{ e.hostPath }}</td>
+      </tr>
+    </tbody>
+  </table>
+</main>
